@@ -1,18 +1,37 @@
 ﻿using LibMember.Model;
 using LibMember.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibMember.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class MemberController : ControllerBase
     {
         private readonly IMemberRepository _memberRepository;
-        public MemberController(IMemberRepository memberRepository)
+        private readonly IJwtAuthenticationManager _jwtAuthenticationManager;
+        public MemberController(IMemberRepository memberRepository, IJwtAuthenticationManager jwtAuthenticationManager)
         {
             _memberRepository = memberRepository;
+            _jwtAuthenticationManager = jwtAuthenticationManager;
+
+
+        }
+
+        [AllowAnonymous]
+        [HttpPost("authenticate")]
+        public IActionResult Authenticate([FromBody] UserCred userCred)
+        {
+            var token = _jwtAuthenticationManager.authenticateAsync(userCred.UserName, userCred.Password);
+            if (token == null)
+            {
+                return Unauthorized();
+            }
+            return Ok(token);
+
         }
 
         [HttpGet]
@@ -35,6 +54,7 @@ namespace LibMember.Controllers
             await _memberRepository.AddAsync(newMember);
             return Ok("Member added successfully");
         }
+
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateMember(int id, Member updatedMember)

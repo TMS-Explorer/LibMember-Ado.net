@@ -6,6 +6,7 @@ namespace LibMember.Repository
     {
        
             Task<List<Member>> GetAllAsync();
+            Task<List<UserCred>>GetAllUserNameAsync();
             Task<Member> GetByIdAsync(int id);
             Task<int> AddAsync(Member newMember);
             Task UpdateAsync(Member updatedMember);

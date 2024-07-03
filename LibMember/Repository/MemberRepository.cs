@@ -1,5 +1,6 @@
 ﻿using LibMember.Model;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
@@ -46,6 +47,37 @@ namespace LibMember.Repository
                 }
             }
         }
+
+        public async Task <List<UserCred>> GetAllUserNameAsync()
+         {
+            List<UserCred> userCreds = new List<UserCred>();
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+
+                using (SqlCommand command = new SqlCommand("SELECT UserName, Pswd FROM Members", connection))
+                {
+                                  
+       
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            UserCred u1 =
+                            new UserCred
+                            {
+                                UserName = reader.GetString(0).ToString(),
+                                Password = reader.GetString(1).ToString()
+                            };
+                            userCreds.Add(u1);
+                        }
+                    }
+
+                    return userCreds;
+                } 
+            }
+        }
+ 
 
         public async Task<Member> GetByIdAsync(int id)
         {
